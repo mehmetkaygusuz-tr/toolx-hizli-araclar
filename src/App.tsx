@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, Suspense, lazy } from 'react';
 import { Header } from './presentation/components/layout/Header';
 import { CategoryBar } from './presentation/components/layout/CategoryBar';
 import { ToolIconLauncher } from './presentation/components/layout/ToolIconLauncher';
@@ -6,53 +6,31 @@ import { RightToolsPanel } from './presentation/components/layout/RightToolsPane
 import { Footer } from './presentation/components/layout/Footer';
 import { ToolCategory, TOOLS, ToolItem } from './application/registry/toolsRegistry';
 import { useLocalStorage } from './application/hooks/useLocalStorage';
-import { SearchX, Pin, ArrowLeft, PanelRightOpen } from 'lucide-react';
+import { SearchX, Pin, ArrowLeft, PanelRightOpen, Loader2 } from 'lucide-react';
 
-// Tool Components
-import { ImageCompressorTool } from './presentation/components/tools/ImageCompressorTool';
-import { ColorPaletteTool } from './presentation/components/tools/ColorPaletteTool';
-import { VatCalculatorTool } from './presentation/components/tools/VatCalculatorTool';
-import { DiscountCalculatorTool } from './presentation/components/tools/DiscountCalculatorTool';
-import { PercentageCalculatorTool } from './presentation/components/tools/PercentageCalculatorTool';
-import { BmiCalculatorTool } from './presentation/components/tools/BmiCalculatorTool';
-import { BillSplitTool } from './presentation/components/tools/BillSplitTool';
-import { TextCounterTool } from './presentation/components/tools/TextCounterTool';
-import { TurkishCaseConverterTool } from './presentation/components/tools/TurkishCaseConverterTool';
-import { TextCleanerDiffTool } from './presentation/components/tools/TextCleanerDiffTool';
-import { DateDifferenceTool } from './presentation/components/tools/DateDifferenceTool';
-import { AgeZodiacTool } from './presentation/components/tools/AgeZodiacTool';
-import { StopwatchTimerTool } from './presentation/components/tools/StopwatchTimerTool';
-import { WorldClockTool } from './presentation/components/tools/WorldClockTool';
-import { UnitConverterTool } from './presentation/components/tools/UnitConverterTool';
-import { TemperatureConverterTool } from './presentation/components/tools/TemperatureConverterTool';
-import { QrCodeGeneratorTool } from './presentation/components/tools/QrCodeGeneratorTool';
-import { PasswordPinGeneratorTool } from './presentation/components/tools/PasswordPinGeneratorTool';
-import { RandomPickerTool } from './presentation/components/tools/RandomPickerTool';
-import { SignaturePadTool } from './presentation/components/tools/SignaturePadTool';
-import { QuickScratchpadTool } from './presentation/components/tools/QuickScratchpadTool';
-
-const TOOL_COMPONENTS_MAP: Record<string, React.FC> = {
-  'gorsel-sikistir': ImageCompressorTool,
-  'renk-paleti': ColorPaletteTool,
-  'kdv-hesaplama': VatCalculatorTool,
-  'indirim-kar': DiscountCalculatorTool,
-  'yuzde-hesaplama': PercentageCalculatorTool,
-  'vki-hesaplama': BmiCalculatorTool,
-  'hesap-bolusturucu': BillSplitTool,
-  'kelime-sayaci': TextCounterTool,
-  'turkce-harf-donusturucu': TurkishCaseConverterTool,
-  'metin-temizleyici': TextCleanerDiffTool,
-  'tarih-farki': DateDifferenceTool,
-  'yas-burc': AgeZodiacTool,
-  'kronometre-sayac': StopwatchTimerTool,
-  'dunya-saatleri': WorldClockTool,
-  'birim-donusturucu': UnitConverterTool,
-  'sicaklik-donusturucu': TemperatureConverterTool,
-  'qr-kod-olusturucu': QrCodeGeneratorTool,
-  'guclu-parola': PasswordPinGeneratorTool,
-  'rastgele-secici': RandomPickerTool,
-  'dijital-imza': SignaturePadTool,
-  'hizli-not': QuickScratchpadTool,
+// Lazy-loaded Tool Components for high-performance Core Web Vitals (on-demand chunking)
+const TOOL_COMPONENTS_MAP: Record<string, React.LazyExoticComponent<React.ComponentType<any>>> = {
+  'gorsel-sikistir': lazy(() => import('./presentation/components/tools/ImageCompressorTool').then((m) => ({ default: m.ImageCompressorTool }))),
+  'renk-paleti': lazy(() => import('./presentation/components/tools/ColorPaletteTool').then((m) => ({ default: m.ColorPaletteTool }))),
+  'kdv-hesaplama': lazy(() => import('./presentation/components/tools/VatCalculatorTool').then((m) => ({ default: m.VatCalculatorTool }))),
+  'indirim-kar': lazy(() => import('./presentation/components/tools/DiscountCalculatorTool').then((m) => ({ default: m.DiscountCalculatorTool }))),
+  'yuzde-hesaplama': lazy(() => import('./presentation/components/tools/PercentageCalculatorTool').then((m) => ({ default: m.PercentageCalculatorTool }))),
+  'vki-hesaplama': lazy(() => import('./presentation/components/tools/BmiCalculatorTool').then((m) => ({ default: m.BmiCalculatorTool }))),
+  'hesap-bolusturucu': lazy(() => import('./presentation/components/tools/BillSplitTool').then((m) => ({ default: m.BillSplitTool }))),
+  'kelime-sayaci': lazy(() => import('./presentation/components/tools/TextCounterTool').then((m) => ({ default: m.TextCounterTool }))),
+  'turkce-harf-donusturucu': lazy(() => import('./presentation/components/tools/TurkishCaseConverterTool').then((m) => ({ default: m.TurkishCaseConverterTool }))),
+  'metin-temizleyici': lazy(() => import('./presentation/components/tools/TextCleanerDiffTool').then((m) => ({ default: m.TextCleanerDiffTool }))),
+  'tarih-farki': lazy(() => import('./presentation/components/tools/DateDifferenceTool').then((m) => ({ default: m.DateDifferenceTool }))),
+  'yas-burc': lazy(() => import('./presentation/components/tools/AgeZodiacTool').then((m) => ({ default: m.AgeZodiacTool }))),
+  'kronometre-sayac': lazy(() => import('./presentation/components/tools/StopwatchTimerTool').then((m) => ({ default: m.StopwatchTimerTool }))),
+  'dunya-saatleri': lazy(() => import('./presentation/components/tools/WorldClockTool').then((m) => ({ default: m.WorldClockTool }))),
+  'birim-donusturucu': lazy(() => import('./presentation/components/tools/UnitConverterTool').then((m) => ({ default: m.UnitConverterTool }))),
+  'sicaklik-donusturucu': lazy(() => import('./presentation/components/tools/TemperatureConverterTool').then((m) => ({ default: m.TemperatureConverterTool }))),
+  'qr-kod-olusturucu': lazy(() => import('./presentation/components/tools/QrCodeGeneratorTool').then((m) => ({ default: m.QrCodeGeneratorTool }))),
+  'guclu-parola': lazy(() => import('./presentation/components/tools/PasswordPinGeneratorTool').then((m) => ({ default: m.PasswordPinGeneratorTool }))),
+  'rastgele-secici': lazy(() => import('./presentation/components/tools/RandomPickerTool').then((m) => ({ default: m.RandomPickerTool }))),
+  'dijital-imza': lazy(() => import('./presentation/components/tools/SignaturePadTool').then((m) => ({ default: m.SignaturePadTool }))),
+  'hizli-not': lazy(() => import('./presentation/components/tools/QuickScratchpadTool').then((m) => ({ default: m.QuickScratchpadTool }))),
 };
 
 export default function App() {
@@ -163,9 +141,20 @@ export default function App() {
               </span>
             </div>
 
-            {/* Selected Tool Interactive Component */}
+            {/* Selected Tool Interactive Component (Loaded on demand) */}
             <div className="w-full">
-              {SelectedToolComponent && <SelectedToolComponent />}
+              {SelectedToolComponent && (
+                <Suspense
+                  fallback={
+                    <div className="flex flex-col items-center justify-center py-20 space-y-3">
+                      <Loader2 className="w-7 h-7 text-blue-500 animate-spin" />
+                      <p className="text-xs text-slate-400">Araç yükleniyor...</p>
+                    </div>
+                  }
+                >
+                  <SelectedToolComponent />
+                </Suspense>
+              )}
             </div>
           </div>
         ) : (

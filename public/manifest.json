@@ -4,19 +4,20 @@
   "description": "toolx.com.tr için hızlı, reklamsız, gizlilik odaklı ve pratik günlük araçlar modülü.",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "./favicon.svg",
       "type": "image/svg+xml",
       "sizes": "any",
       "purpose": "any maskable"
     },
     {
-      "src": "/logo-icon.svg",
+      "src": "./logo-icon.svg",
       "type": "image/svg+xml",
       "sizes": "512x512",
       "purpose": "any"
     }
   ],
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "background_color": "#090d16",
   "theme_color": "#090d16",
   "display": "standalone",
