@@ -213,7 +213,7 @@ export default function App() {
 
             {/* App Icons Launcher Grid (Pure icons, expanding card on hover) */}
             {filteredTools.length > 0 ? (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-y-12 gap-x-6 sm:gap-x-10 justify-items-center py-8">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-y-12 gap-x-6 sm:gap-x-10 justify-items-center py-8 pr-4 sm:pr-8">
                 {filteredTools.map((tool) => (
                   <ToolIconLauncher
                     key={tool.id}
@@ -267,7 +267,7 @@ export default function App() {
       <button
         type="button"
         onClick={() => setIsToolsPanelOpen((prev) => !prev)}
-        className={`fixed right-0 top-1/2 -translate-y-1/2 z-30 bg-blue-600 hover:bg-blue-500 text-white py-3 px-1.5 rounded-l-xl shadow-2xl flex flex-col items-center gap-1.5 border-y border-l border-blue-400/40 transition-all hover:-translate-x-0.5 cursor-pointer group ${
+        className={`fixed right-0 top-1/2 -translate-y-1/2 z-50 bg-blue-600 hover:bg-blue-500 text-white py-3 px-1.5 rounded-l-xl shadow-2xl flex flex-col items-center gap-1.5 border-y border-l border-blue-400/40 transition-all hover:-translate-x-0.5 cursor-pointer group ${
           isToolsPanelOpen ? 'lg:hidden' : 'flex'
         }`}
         title={isToolsPanelOpen ? 'Menüyü Kapat' : 'Hızlı Menüyü Aç'}

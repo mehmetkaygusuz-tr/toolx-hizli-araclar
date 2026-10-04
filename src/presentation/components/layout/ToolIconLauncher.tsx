@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ToolItem } from '../../../application/registry/toolsRegistry';
 import {
   ImageDown,
@@ -65,13 +65,56 @@ export const ToolIconLauncher: React.FC<ToolIconLauncherProps> = ({
   onTogglePin,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [cardPlacement, setCardPlacement] = useState<'center' | 'left' | 'right'>('center');
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const IconComponent = ICON_MAP[tool.iconName] || ImageDown;
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    };
+  }, []);
+
+  const handleMouseEnter = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const spaceOnRight = window.innerWidth - rect.right;
+        const spaceOnLeft = rect.left;
+
+        // If closer than 200px to right edge, pop towards the left so it never overlaps right edge or the sidebar button!
+        if (spaceOnRight < 200) {
+          setCardPlacement('left');
+        } else if (spaceOnLeft < 200) {
+          setCardPlacement('right');
+        } else {
+          setCardPlacement('center');
+        }
+      }
+      setIsHovered(true);
+    }, 180); // 180ms intentional hover delay avoids flashing card when cursor passes across to the right panel
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setIsHovered(false);
+  };
+
+  const placementClasses =
+    cardPlacement === 'left'
+      ? 'right-0 top-1/2 -translate-y-1/2 origin-right'
+      : cardPlacement === 'right'
+      ? 'left-0 top-1/2 -translate-y-1/2 origin-left'
+      : 'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 origin-center';
 
   return (
     <div
+      ref={containerRef}
       className="group relative flex flex-col items-center select-none w-20 sm:w-24 cursor-pointer"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={() => onSelect(tool)}
     >
       {/* 1. MOBILE OS STYLE APP SQUIRCLE ICON */}
@@ -108,14 +151,14 @@ export const ToolIconLauncher: React.FC<ToolIconLauncherProps> = ({
         {tool.name}
       </span>
 
-      {/* 3. HOVER PREVIEW CARD: Smoothly expands centered over the icon */}
+      {/* 3. HOVER PREVIEW CARD: Smoothly expands without spilling out or covering right edge */}
       {isHovered && (
         <div
           onClick={(e) => {
             e.stopPropagation();
             onSelect(tool);
           }}
-          className="absolute z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 sm:w-72 p-4 rounded-3xl bg-[#0d1322]/95 backdrop-blur-2xl border border-blue-500/50 shadow-2xl shadow-black/95 flex flex-col items-center text-center cursor-pointer animate-in fade-in zoom-in-90 duration-200 pointer-events-auto"
+          className={`absolute z-40 ${placementClasses} w-60 sm:w-68 max-w-[calc(100vw-3rem)] p-4 rounded-3xl bg-[#0d1322]/95 backdrop-blur-2xl border border-blue-500/50 shadow-2xl shadow-black/95 flex flex-col items-center text-center cursor-pointer animate-in fade-in zoom-in-95 duration-150 pointer-events-auto`}
         >
           {/* Ambient glow */}
           <div
