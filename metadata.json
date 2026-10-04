@@ -1,0 +1,8 @@
+{
+  "name": "ToolX Hızlı Araçlar - Pratik Günlük Araçlar Modülü",
+  "description": "toolx.com.tr için hızlı, sade ve güçlü günlük araçlar: Görsel sıkıştırma, KDV hesaplayıcı, birim dönüştürücü, QR kod oluşturucu ve kelime sayacı.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
