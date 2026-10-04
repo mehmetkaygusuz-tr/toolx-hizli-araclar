@@ -35,16 +35,33 @@ const TOOL_COMPONENTS_MAP: Record<string, React.LazyExoticComponent<React.Compon
 
 export default function App() {
   const [activeCategory, setActiveCategory] = useState<ToolCategory>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Default strictly to null (Home page with app icons on initial load)
   const [selectedTool, setSelectedTool] = useState<ToolItem | null>(null);
-  const [isRightPanelOpen, setIsRightPanelOpen] = useState<boolean>(false);
+  const [isToolsPanelOpen, setIsToolsPanelOpen] = useState<boolean>(false);
 
-  const [pinnedToolIds, setPinnedToolIds] = useLocalStorage<string[]>('toolx_pinned_tools', [
-    'gorsel-sikistir',
-    'kdv-hesaplama',
-  ]);
+  const [pinnedToolIds, setPinnedToolIds] = useLocalStorage<string[]>('toolx_pinned_tools', []);
+
+  // Ensure default does not force pre-pinned tools (user will add their own favorites)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('toolx_pinned_tools');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (
+          Array.isArray(parsed) &&
+          parsed.length === 2 &&
+          parsed.includes('gorsel-sikistir') &&
+          parsed.includes('kdv-hesaplama')
+        ) {
+          setPinnedToolIds([]);
+          localStorage.setItem('toolx_pinned_tools', JSON.stringify([]));
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [setPinnedToolIds]);
 
   // Clean initial load: if there was a leftover hash on refresh, clean it so home page opens first
   useEffect(() => {
@@ -61,7 +78,7 @@ export default function App() {
 
   const goHome = useCallback(() => {
     setSelectedTool(null);
-    setIsRightPanelOpen(false);
+    setIsToolsPanelOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     window.history.replaceState(null, '', window.location.pathname);
   }, []);
@@ -83,23 +100,15 @@ export default function App() {
     return counts;
   }, []);
 
-  // Filter tools based on category and search query
+  // Filter tools based on active category
   const filteredTools = useMemo(() => {
     return TOOLS.filter((tool) => {
       if (activeCategory !== 'all' && tool.category !== activeCategory) {
         return false;
       }
-      if (searchQuery.trim().length > 0) {
-        const q = searchQuery.toLowerCase().trim();
-        return (
-          tool.name.toLowerCase().includes(q) ||
-          tool.shortDesc.toLowerCase().includes(q) ||
-          tool.keywords.some((k) => k.toLowerCase().includes(q))
-        );
-      }
       return true;
     });
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory]);
 
   // Toggle tool pin
   const togglePin = (id: string, e?: React.MouseEvent) => {
@@ -113,15 +122,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#080c14] text-slate-100 selection:bg-blue-600 selection:text-white relative">
-      {/* Top Header Navbar: Logo mark only on left, search bar in center */}
+      {/* Top Header Navbar: Logo on left, standalone search bar with dropdown in center */}
       <Header
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
         onGoHome={goHome}
+        onSelectTool={openTool}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-5 pb-12">
+      {/* Main Container below Header: Spans full width edge-to-edge */}
+      <div className="flex-1 w-full flex items-start relative">
+        <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 pt-4 pb-12 transition-all duration-200">
         {selectedTool ? (
           /* ACTIVE TOOL PAGE VIEW */
           <div className="space-y-5 animate-in fade-in duration-200">
@@ -169,8 +178,8 @@ export default function App() {
               />
             </div>
 
-            {/* Pinned Tools Row (Only when category is 'all' and search is empty) */}
-            {pinnedToolIds.length > 0 && searchQuery === '' && activeCategory === 'all' && (
+            {/* Pinned Tools Row (Only when category is 'all') */}
+            {pinnedToolIds.length > 0 && activeCategory === 'all' && (
               <div className="mb-6 p-3 bg-slate-900/40 rounded-2xl border border-slate-800/80">
                 <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wider">
                   <Pin className="w-3.5 h-3.5 text-blue-400" />
@@ -216,17 +225,16 @@ export default function App() {
                 ))}
               </div>
             ) : (
-              /* Empty Search State */
+              /* Empty Category State */
               <div className="py-20 text-center space-y-3 bg-slate-900/30 rounded-2xl border border-slate-800 my-8">
                 <SearchX className="w-10 h-10 text-slate-500 mx-auto" />
-                <h3 className="text-base font-semibold text-white">Aradığınız araç bulunamadı</h3>
+                <h3 className="text-base font-semibold text-white">Bu kategoride araç bulunamadı</h3>
                 <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  &quot;{searchQuery}&quot; sorgusuna uygun araç mevcut değil.
+                  Seçtiğiniz kategoriye ait araç bulunmuyor.
                 </p>
                 <button
                   type="button"
                   onClick={() => {
-                    setSearchQuery('');
                     setActiveCategory('all');
                   }}
                   className="mt-2 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors cursor-pointer"
@@ -237,34 +245,52 @@ export default function App() {
             )}
           </div>
         )}
-      </main>
+        </main>
 
-      {/* Floating Right Edge Drawer Button (Always visible on home and tool pages) */}
+        {/* Desktop Docked Sidebar (lg+): FLUSH TO THE RIGHT EDGE, connects under header, 0px margin */}
+        {isToolsPanelOpen && (
+          <aside className="hidden lg:flex w-72 sm:w-80 shrink-0 sticky top-16 h-[calc(100vh-4rem)] bg-[#090d16] flex-col z-20 animate-in fade-in slide-in-from-right-2 duration-150">
+            <RightToolsPanel
+              isOpen={true}
+              onClose={() => setIsToolsPanelOpen(false)}
+              activeToolId={selectedTool ? selectedTool.id : null}
+              onSelectTool={(tool) => openTool(tool)}
+              pinnedToolIds={pinnedToolIds}
+              onTogglePin={togglePin}
+              variant="sidebar"
+            />
+          </aside>
+        )}
+      </div>
+
+      {/* Floating Right Edge Drawer Button (Always visible on mobile, visible on desktop when sidebar is closed) */}
       <button
         type="button"
-        onClick={() => setIsRightPanelOpen((prev) => !prev)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 bg-blue-600 hover:bg-blue-500 text-white py-3.5 px-2 rounded-l-2xl shadow-2xl flex flex-col items-center gap-2 border-y border-l border-blue-400/40 transition-transform hover:-translate-x-1 cursor-pointer"
-        title="Araçlar Panelini Aç/Kapat"
+        onClick={() => setIsToolsPanelOpen((prev) => !prev)}
+        className={`fixed right-0 top-1/2 -translate-y-1/2 z-30 bg-blue-600 hover:bg-blue-500 text-white py-3 px-1.5 rounded-l-xl shadow-2xl flex flex-col items-center gap-1.5 border-y border-l border-blue-400/40 transition-all hover:-translate-x-0.5 cursor-pointer group ${
+          isToolsPanelOpen ? 'lg:hidden' : 'flex'
+        }`}
+        title={isToolsPanelOpen ? 'Menüyü Kapat' : 'Hızlı Menüyü Aç'}
+        aria-label="Hızlı Araçlar Menüsünü Aç/Kapat"
       >
-        <PanelRightOpen className="w-4 h-4" />
-        <span className="text-[10px] font-bold tracking-widest uppercase [writing-mode:vertical-lr]">
+        <PanelRightOpen className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+        <span className="text-[9px] font-bold tracking-widest uppercase [writing-mode:vertical-lr]">
           Araçlar
         </span>
       </button>
 
-      {/* Right Tools Switcher Drawer Panel */}
-      <RightToolsPanel
-        isOpen={isRightPanelOpen}
-        onClose={() => setIsRightPanelOpen(false)}
-        activeToolId={selectedTool ? selectedTool.id : null}
-        onSelectTool={(tool) => {
-          openTool(tool);
-          setIsRightPanelOpen(false);
-        }}
-        pinnedToolIds={pinnedToolIds}
-        onTogglePin={togglePin}
-        variant="drawer"
-      />
+      {/* Mobile Drawer (Only on screens < lg so it doesn't crush the mobile screen) */}
+      <div className="lg:hidden">
+        <RightToolsPanel
+          isOpen={isToolsPanelOpen}
+          onClose={() => setIsToolsPanelOpen(false)}
+          activeToolId={selectedTool ? selectedTool.id : null}
+          onSelectTool={(tool) => openTool(tool)}
+          pinnedToolIds={pinnedToolIds}
+          onTogglePin={togglePin}
+          variant="drawer"
+        />
+      </div>
 
       {/* Minimal Footer */}
       <Footer />

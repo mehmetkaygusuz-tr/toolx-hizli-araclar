@@ -93,6 +93,7 @@ export const ToolIconLauncher: React.FC<ToolIconLauncherProps> = ({
           {/* Icon */}
           <IconComponent
             className={`w-8 h-8 sm:w-9 sm:h-9 ${tool.iconColor} drop-shadow-md relative z-10`}
+            strokeWidth={2.2}
           />
 
           {/* Pin marker indicator */}
@@ -166,7 +167,10 @@ export const ToolIconLauncher: React.FC<ToolIconLauncherProps> = ({
           <div
             className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${tool.gradient} flex items-center justify-center shadow-md border border-white/20 mb-2.5 relative z-10 shrink-0`}
           >
-            <IconComponent className={`w-6 h-6 ${tool.iconColor} drop-shadow`} />
+            <IconComponent
+              className={`w-6 h-6 ${tool.iconColor} drop-shadow`}
+              strokeWidth={2.2}
+            />
           </div>
 
           {/* Tool Title */}
