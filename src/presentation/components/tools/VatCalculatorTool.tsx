@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Receipt, ArrowRightLeft } from 'lucide-react';
+import { Receipt, ArrowRightLeft, Info } from 'lucide-react';
 import { ToolCard } from '../common/ToolCard';
 import { calculateVat, VatDirection, WithholdingFraction } from '../../../domain/math/vatCalculator';
 import { CopyButton } from '../common/CopyButton';
@@ -203,6 +203,15 @@ export const VatCalculatorTool: React.FC = () => {
               <div className="flex items-center justify-between py-1.5 text-white font-bold text-base">
                 <span>KDV Dahil Genel Toplam:</span>
                 <span className="font-mono">{formatCurrency(result.totalAmount)}</span>
+              </div>
+            </div>
+
+            {/* Mali Mevzuat Yasal Bilgilendirme */}
+            <div className="flex items-start gap-2.5 p-3 bg-slate-900/60 border border-slate-800 rounded-xl text-xs text-slate-400 leading-relaxed">
+              <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-slate-300 font-semibold">Mali Bilgilendirme:</strong>{' '}
+                Hesaplanan tutarlar ve tevkifat kesintileri Türkiye Cumhuriyeti güncel vergi mevzuatına göre bilgilendirme amaçlıdır. Resmi fatura, muhasebe kaydı veya vergi beyannamesi yerine geçmez; nihai işlemleriniz için mali müşavirinize başvurunuz.
               </div>
             </div>
           </div>

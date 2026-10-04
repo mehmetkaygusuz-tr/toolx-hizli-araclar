@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { PenTool, Download, Trash2, RotateCcw } from 'lucide-react';
+import { PenTool, Download, Trash2, RotateCcw, ShieldAlert } from 'lucide-react';
 import { ToolCard } from '../common/ToolCard';
 
 export const SignaturePadTool: React.FC = () => {
@@ -180,6 +180,15 @@ export const SignaturePadTool: React.FC = () => {
               İmzanızı fare veya parmağınızla buraya çizin
             </div>
           )}
+        </div>
+
+        {/* 5070 Sayılı Kanun Yasal Bilgilendirme */}
+        <div className="flex items-start gap-2.5 p-3 bg-amber-950/20 border border-amber-800/40 rounded-xl text-xs text-amber-200/90 leading-relaxed">
+          <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <strong className="text-amber-300 font-semibold">Yasal Bilgilendirme (5070 Sayılı E-İmza Kanunu):</strong>{' '}
+            Bu araç yalnızca görsel amaçlı basit çizim/paraf oluşturur. 5070 Sayılı Elektronik İmza Kanunu kapsamında tanımlanan Nitelikli Elektronik Sertifikaya dayalı &quot;Güvenli Elektronik İmza&quot; niteliğinde değildir; resmi kurumlarda ve ıslak imza şartı bulunan sözleşmelerde hukuki bağlayıcılığı yoktur.
+          </div>
         </div>
       </div>
     </ToolCard>

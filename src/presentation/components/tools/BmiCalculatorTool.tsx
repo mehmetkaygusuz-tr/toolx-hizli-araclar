@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Scale, HeartPulse, User } from 'lucide-react';
+import { Scale, HeartPulse, User, Info } from 'lucide-react';
 import { ToolCard } from '../common/ToolCard';
 import { calculateBmi } from '../../../domain/math/bmiCalculator';
 
@@ -130,6 +130,15 @@ export const BmiCalculatorTool: React.FC = () => {
             <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 text-xs text-slate-300 leading-relaxed">
               <span className="font-semibold text-white mr-1">Değerlendirme:</span>
               {result.healthAdviceTr}
+            </div>
+
+            {/* Tıbbi Sorumluluk Reddi (1219 Sayılı Kanun & WHO) */}
+            <div className="flex items-start gap-2.5 p-3 bg-sky-950/20 border border-sky-800/40 rounded-xl text-xs text-sky-200/90 leading-relaxed">
+              <Info className="w-4 h-4 text-sky-400 shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-sky-300 font-semibold">Tıbbi Bilgilendirme:</strong>{' '}
+                Hesaplanan değerler Dünya Sağlık Örgütü (WHO) genel yetişkin standartlarına dayalı matematiksel tahminlerdir. Tıbbi teşhis, tedavi veya klinik diyet önerisi niteliği taşımaz; sağlık kararlarınız için uzman hekime danışınız.
+              </div>
             </div>
           </div>
         </div>
