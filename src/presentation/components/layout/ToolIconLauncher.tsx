@@ -77,6 +77,14 @@ export const ToolIconLauncher: React.FC<ToolIconLauncherProps> = ({
   }, []);
 
   const handleMouseEnter = () => {
+    // Disable preview card completely on mobile and touch devices
+    if (
+      typeof window !== 'undefined' &&
+      (window.innerWidth < 768 || window.matchMedia('(hover: none)').matches)
+    ) {
+      return;
+    }
+
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
     hoverTimerRef.current = setTimeout(() => {
       if (containerRef.current) {
@@ -151,14 +159,14 @@ export const ToolIconLauncher: React.FC<ToolIconLauncherProps> = ({
         {tool.name}
       </span>
 
-      {/* 3. HOVER PREVIEW CARD: Smoothly expands without spilling out or covering right edge */}
+      {/* 3. HOVER PREVIEW CARD: Desktop only, completely removed on mobile */}
       {isHovered && (
         <div
           onClick={(e) => {
             e.stopPropagation();
             onSelect(tool);
           }}
-          className={`absolute z-40 ${placementClasses} w-60 sm:w-68 max-w-[calc(100vw-3rem)] p-4 rounded-3xl bg-[#0d1322]/95 backdrop-blur-2xl border border-blue-500/50 shadow-2xl shadow-black/95 flex flex-col items-center text-center cursor-pointer animate-in fade-in zoom-in-95 duration-150 pointer-events-auto`}
+          className={`hidden md:flex flex-col absolute z-40 ${placementClasses} w-60 sm:w-68 max-w-[calc(100vw-3rem)] p-4 rounded-3xl bg-[#0d1322]/95 backdrop-blur-2xl border border-blue-500/50 shadow-2xl shadow-black/95 items-center text-center cursor-pointer animate-in fade-in zoom-in-95 duration-150 pointer-events-auto`}
         >
           {/* Ambient glow */}
           <div
